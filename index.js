@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import { Configuration, OpenAIApi } from 'openai';
 import { createReadStream, readFileSync, writeFileSync } from 'fs';
 import fetch from 'node-fetch';
+import request from 'request';
 
 dotenv.config();
 
@@ -22,26 +23,45 @@ let remainingRequest = maxRequest;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+
+
 app.get('/', (req, res) => {
   res.send(`
-    <html>
-      <head>
-        <title>OpenAI Image Generator</title>
-      </head>
-      <body>
-        <div class="container">
-          <h1>AI Image Generator</h1>
-          <p>Remaining requests today: ${remainingRequest}</p>
-          <form id="image-form">
-            <label for="prompt">Enter the prompt:</label><br>
-            <textarea id="prompt" name="prompt" rows="4" cols="50"></textarea><br>
-            <button type="submit">Generate Image</button>
-          </form>
-          <div id="loader" style="display: none;">Generating image, please wait...</div>
-          <div id="result"></div>
-        </div>
-        <script>
-          document.querySelector('#image-form').addEventListener('submit', async (event) => {
+  <html>
+  <head>
+    <title>OpenAI Image Generator</title>
+    <style>
+     .spinner {
+       border: 16px solid #f3f3f3; /* Light grey */
+       border-top: 16px solid #3498db; /* Blue */
+       border-radius: 50%;
+       width: 120px;
+       height: 120px;
+       animation: spin 2s linear infinite;
+     }
+
+     @keyframes spin {
+       0% { transform: rotate(0deg); }
+       100% { transform: rotate(360deg); }
+     }
+   </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>AI Image Generator</h1>
+      <p>Remaining requests today: ${remainingRequest}</p>
+      <form id="image-form">
+        <label for="prompt">Enter the prompt:</label><br>
+        <textarea id="prompt" name="prompt" rows="4" cols="50"></textarea><br>
+        <button type="submit">Generate Image</button>
+      </form>
+      <div id="loader" style="display: none;">
+        <div class="spinner"></div>
+      </div>
+      <div id="result"></div>
+    </div>
+    <script>
+       document.querySelector('#image-form').addEventListener('submit', async (event) => {
             event.preventDefault();
             
             const loader = document.getElementById('loader');
@@ -73,9 +93,9 @@ app.get('/', (req, res) => {
             loader.style.display = 'none';
             submitButton.disabled = false;
           });
-        </script>
-      </body>
-    </html>
+    </script>
+  </body>
+</html>
   `);
 });
 
